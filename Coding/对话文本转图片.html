@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>对话分享图生成器 (稳定回归版)</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入html2canvas库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- 引入JSZip库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- 引入Google字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+        #preview-area-wrapper { transition: all 0.3s ease-in-out; }
+        #preview-content::-webkit-scrollbar { display: none; }
+        #preview-content { -ms-overflow-style: none; scrollbar-width: none; }
+        button:disabled { cursor: not-allowed; opacity: 0.6; }
+
+        /* 字体定义 */
+        .font-modern-sans { font-family: 'Noto Sans SC', sans-serif; }
+        .font-classic-serif { font-family: 'Noto Serif SC', 'Roboto Mono', serif; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">对话分享图生成器</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">轻松将你与AI的对话，转化为精美的社交分享图片。</p>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+
+            <!-- 控制面板 -->
+            <aside class="w-full lg:w-1/3 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">内容设置</h2>
+                
+                <div class="space-y-4" id="conversation-inputs">
+                    <div class="dialogue-block p-4 border border-gray-200 dark:border-gray-700 rounded-lg relative" data-type="pair">
+                         <button class="remove-block absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl">&times;</button>
+                         <label class="block text-sm font-medium">你的提问</label>
+                         <textarea class="user-input w-full p-2 border" rows="4" placeholder="输入你的问题...">sunlight is the best disinfectant. posting your weekly reading hours is also the best way to build a reading habit.</textarea>
+                         <label class="block text-sm font-medium mt-3">AI的回答</label>
+                         <textarea class="ai-input w-full p-2 border" rows="6" placeholder="输入AI的回答...">阳光，是最好的防腐剂。坚持每周晒一次读书时长，也是养成阅读习惯的最佳机制。</textarea>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-4">
+                    <button id="add-user-dialogue" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg text-sm">+ 你的提问</button>
+                    <button id="add-ai-dialogue" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg text-sm">+ AI的回答</button>
+                    <button id="add-dialogue-pair" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-3 rounded-lg text-sm">+ 对话组</button>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h3 class="text-2xl font-bold mb-4">样式设置</h3>
+                    <div class="space-y-4">
+                        <div><label for="card-title" class="block text-sm font-medium">卡片标题</label><input type="text" id="card-title" class="mt-1 block w-full p-2 border" value="每日阅读省思"></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label for="user-name" class="block text-sm font-medium">你的昵称</label><input type="text" id="user-name" class="mt-1 block w-full p-2 border" value="Q"></div>
+                            <div><label for="ai-name" class="block text-sm font-medium">AI的昵称</label><input type="text" id="ai-name" class="mt-1 block w-full p-2 border" value="A"></div>
+                        </div>
+                        <div><label for="social-handle" class="block text-sm font-medium">社交账号</label><input type="text" id="social-handle" class="mt-1 block w-full p-2 border" placeholder="@你的用户名"></div>
+                        <div><label for="aspect-ratio-selector" class="block text-sm font-medium">图片比例</label><select id="aspect-ratio-selector" class="mt-1 block w-full p-2 border"><option value="9/16">9:16 (故事)</option><option value="4/5">4:5 (竖屏)</option><option value="1/1">1:1 (方形)</option><option value="16/9">16:9 (横屏)</option></select></div>
+                        <div><label for="theme-selector" class="block text-sm font-medium">选择主题</label><select id="theme-selector" class="mt-1 block w-full p-2 border"><option value="vintage-bubble">复古对话</option><option value="vintage-text">复古印刷</option><option value="light">简约对话</option><option value="dark">深空对话</option></select></div>
+                        <div class="pt-2">
+                            <label for="auto-slice-toggle" class="flex items-center cursor-pointer bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"><input type="checkbox" id="auto-slice-toggle" class="h-5 w-5 rounded text-blue-600"><span class="ml-3 text-sm font-medium">长图自动切片 (下载为ZIP)</span></label>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 预览和下载区域 -->
+            <main class="w-full lg:w-2/3">
+                <div class="sticky top-8">
+                    <h2 class="text-2xl font-bold mb-4 text-center lg:text-left">效果预览</h2>
+                    <div id="preview-area-wrapper" class="w-full bg-white rounded-2xl shadow-lg overflow-hidden">
+                        <div id="preview-area" class="w-full h-full p-8 md:p-12 flex flex-col transition-all duration-300">
+                            <h3 id="preview-title" class="text-3xl md:text-4xl font-bold mb-6 flex-shrink-0"></h3>
+                            <div id="preview-content" class="flex-grow overflow-y-auto pr-4 -mr-4 space-y-4"></div>
+                            <footer id="preview-footer" class="mt-6 text-right text-lg font-medium flex-shrink-0 opacity-75"></footer>
+                        </div>
+                    </div>
+                    <button id="download-btn" class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-lg">下载分享图</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const allElements = {
+                conversationInputs: document.getElementById('conversation-inputs'), addUserBtn: document.getElementById('add-user-dialogue'), addAiBtn: document.getElementById('add-ai-dialogue'), addPairBtn: document.getElementById('add-dialogue-pair'), cardTitleInput: document.getElementById('card-title'), userNameInput: document.getElementById('user-name'), aiNameInput: document.getElementById('ai-name'), socialHandleInput: document.getElementById('social-handle'), aspectRatioSelector: document.getElementById('aspect-ratio-selector'), themeSelector: document.getElementById('theme-selector'), autoSliceToggle: document.getElementById('auto-slice-toggle'), downloadBtn: document.getElementById('download-btn'), previewAreaWrapper: document.getElementById('preview-area-wrapper'), previewArea: document.getElementById('preview-area'), previewTitle: document.getElementById('preview-title'), previewContent: document.getElementById('preview-content'), previewFooter: document.getElementById('preview-footer'),
+            };
+
+            const themes = {
+                'vintage-bubble': { name: 'vintage-bubble', bg: 'bg-white', title: 'text-black', footer: 'text-gray-600', userBg: 'bg-gray-100', userText: 'text-black', aiBg: 'bg-gray-200', aiText: 'text-black', font: 'font-classic-serif', layout: 'bubble' },
+                'vintage-text': { name: 'vintage-text', bg: 'bg-white', text: 'text-black', title: 'text-black', footer: 'text-gray-600', font: 'font-classic-serif', layout: 'textBlock' },
+                light: { name: 'light', bg: 'bg-gray-50', title: 'text-gray-900', footer: 'text-gray-500', userBg: 'bg-blue-100', userText: 'text-blue-900', aiBg: 'bg-gray-200', aiText: 'text-gray-800', font: 'font-modern-sans', layout: 'bubble' },
+                dark: { name: 'dark', bg: 'bg-gray-900', title: 'text-white', footer: 'text-gray-400', userBg: 'bg-blue-900', userText: 'text-blue-100', aiBg: 'bg-gray-700', aiText: 'text-gray-200', font: 'font-modern-sans', layout: 'bubble' }
+            };
+
+            function updatePreview() {
+                const { previewAreaWrapper, previewArea, previewTitle, previewFooter, previewContent, cardTitleInput, socialHandleInput, aspectRatioSelector, themeSelector } = allElements;
+                const selectedTheme = themes[themeSelector.value];
+                
+                previewAreaWrapper.style.aspectRatio = aspectRatioSelector.value;
+                previewArea.className = `w-full h-full p-8 md:p-12 flex flex-col transition-all duration-300 ${selectedTheme.bg} ${selectedTheme.font}`;
+                previewTitle.textContent = cardTitleInput.value || '';
+                previewTitle.className = `text-3xl md:text-4xl font-bold mb-6 flex-shrink-0 ${selectedTheme.title}`;
+                previewFooter.textContent = socialHandleInput.value || '';
+                previewFooter.className = `mt-6 text-right text-lg font-medium flex-shrink-0 opacity-75 ${selectedTheme.footer}`;
+                previewContent.innerHTML = '';
+                previewContent.className = `flex-grow overflow-y-auto pr-4 -mr-4 ${selectedTheme.layout === 'bubble' ? 'space-y-4' : 'space-y-2'}`;
+                
+                document.querySelectorAll('.dialogue-block').forEach(block => {
+                    const userText = block.querySelector('.user-input')?.value;
+                    const aiText = block.querySelector('.ai-input')?.value;
+                    if (selectedTheme.layout === 'bubble') {
+                        if (userText) previewContent.appendChild(createBubble(userText, 'user'));
+                        if (aiText) previewContent.appendChild(createBubble(aiText, 'ai'));
+                    } else {
+                        if (userText) previewContent.appendChild(createTextBlock(userText, 'user'));
+                        if (aiText) previewContent.appendChild(createTextBlock(aiText, 'ai'));
+                    }
+                });
+            }
+
+            function createBubble(text, type) {
+                const { userNameInput, aiNameInput, themeSelector } = allElements;
+                const isUser = type === 'user';
+                const theme = themes[themeSelector.value];
+                const bubble = document.createElement('div');
+                bubble.className = 'w-full flex items-start gap-3 max-w-full';
+                const avatar = document.createElement('div');
+                const avatarName = isUser ? userNameInput.value : aiNameInput.value;
+                let avatarClass = `w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm `;
+                if (theme.name === 'vintage-bubble') avatarClass += isUser ? 'bg-black text-white' : 'bg-gray-400 text-black';
+                else avatarClass += isUser ? 'bg-blue-500 text-white' : 'bg-green-500 text-white';
+                avatar.className = avatarClass;
+                avatar.textContent = avatarName.substring(0, 2);
+                
+                const messageContainer = document.createElement('div');
+                messageContainer.className = `w-full p-4 rounded-lg ${isUser ? `${theme.userBg} ${theme.userText} rounded-tr-none` : `${theme.aiBg} ${theme.aiText} rounded-tl-none`}`;
+                
+                const contentP = document.createElement('p');
+                contentP.className = 'whitespace-pre-wrap';
+                contentP.textContent = text;
+                
+                messageContainer.appendChild(contentP);
+                bubble.appendChild(isUser ? messageContainer : avatar);
+                bubble.appendChild(isUser ? avatar : messageContainer);
+                return bubble;
+            }
+
+            function createTextBlock(text, type) {
+                const { userNameInput, aiNameInput, themeSelector } = allElements;
+                const theme = themes[themeSelector.value];
+                const textBlock = document.createElement('div');
+                const name = type === 'user' ? userNameInput.value : aiNameInput.value;
+                
+                const p = document.createElement('p');
+                p.className = `whitespace-pre-wrap break-words text-lg leading-relaxed ${theme.text}`;
+                p.textContent = `${name}: ${text}`;
+                
+                textBlock.appendChild(p);
+                return textBlock;
+            }
+
+            function addDialogueBlock(type) {
+                const { conversationInputs } = allElements;
+                const block = document.createElement('div');
+                block.className = 'dialogue-block p-4 border border-gray-200 dark:border-gray-700 rounded-lg relative';
+                block.dataset.type = type;
+                let innerHTML = `<button class="remove-block absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl">&times;</button>`;
+                if (type === 'user' || type === 'pair') innerHTML += `<label class="block text-sm font-medium">你的提问</label><textarea class="user-input w-full p-2 border" rows="3" placeholder="..."></textarea>`;
+                if (type === 'ai' || type === 'pair') innerHTML += `<label class="block text-sm font-medium mt-3">AI的回答</label><textarea class="ai-input w-full p-2 border" rows="5" placeholder="..."></textarea>`;
+                block.innerHTML = innerHTML;
+                conversationInputs.appendChild(block);
+            }
+
+            allElements.conversationInputs.addEventListener('click', (event) => {
+                if (event.target.classList.contains('remove-block')) {
+                    event.target.closest('.dialogue-block').remove();
+                    updatePreview();
+                }
+            });
+
+            allElements.conversationInputs.addEventListener('input', (event) => {
+                if (event.target.tagName === 'TEXTAREA') {
+                    updatePreview();
+                }
+            });
+
+            const { addUserBtn, addAiBtn, addPairBtn, ...inputs } = allElements;
+            addUserBtn.addEventListener('click', () => addDialogueBlock('user'));
+            addAiBtn.addEventListener('click', () => addDialogueBlock('ai'));
+            addPairBtn.addEventListener('click', () => addDialogueBlock('pair'));
+            
+            Object.values(inputs).forEach(el => {
+                if(el && (el.tagName === 'INPUT' || el.tagName === 'SELECT')) {
+                   el.addEventListener('input', updatePreview);
+                }
+            });
+
+            allElements.downloadBtn.addEventListener('click', async () => {
+                if (allElements.autoSliceToggle.checked) { await downloadAsSlices(); } else { await downloadAsSingleImage(); }
+            });
+
+            async function downloadAsSingleImage() {
+                const { downloadBtn, previewArea, cardTitleInput } = allElements;
+                downloadBtn.disabled = true; downloadBtn.textContent = '正在生成...';
+                try {
+                    const canvas = await html2canvas(previewArea, { scale: 3, useCORS: true, backgroundColor: null });
+                    const link = document.createElement('a');
+                    link.download = `${cardTitleInput.value || 'dialogue'}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } catch(e) { console.error(e); } finally {
+                    downloadBtn.disabled = false;
+                    downloadBtn.textContent = '下载分享图';
+                }
+            }
+
+            async function downloadAsSlices() {
+                const { downloadBtn, previewArea, aspectRatioSelector, themeSelector, cardTitleInput } = allElements;
+                downloadBtn.disabled = true; downloadBtn.textContent = '正在生成ZIP...';
+                const originalWrapperHeight = allElements.previewAreaWrapper.style.height;
+                allElements.previewAreaWrapper.style.height = 'auto';
+                try {
+                    const longCanvas = await html2canvas(previewArea, { scale: 3, useCORS: true, backgroundColor: null, windowHeight: previewArea.scrollHeight });
+                    const zip = new JSZip();
+                    const aspectRatio = eval(aspectRatioSelector.value);
+                    const sliceHeight = longCanvas.width / aspectRatio;
+                    const numSlices = Math.ceil(longCanvas.height / sliceHeight);
+                    const blobPromises = [];
+                    for (let i = 0; i < numSlices; i++) {
+                        const sliceCanvas = document.createElement('canvas');
+                        sliceCanvas.width = longCanvas.width; sliceCanvas.height = sliceHeight;
+                        const ctx = sliceCanvas.getContext('2d');
+                        const theme = themes[themeSelector.value];
+                        const tempDiv = document.createElement('div');
+                        tempDiv.className = theme.bg; document.body.appendChild(tempDiv);
+                        ctx.fillStyle = window.getComputedStyle(tempDiv).backgroundColor; document.body.removeChild(tempDiv);
+                        ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+                        ctx.drawImage(longCanvas, 0, i * sliceHeight, longCanvas.width, sliceHeight, 0, 0, longCanvas.width, sliceHeight);
+                        const promise = new Promise(resolve => sliceCanvas.toBlob(blob => {
+                            zip.file(`image_${String(i + 1).padStart(2, '0')}.png`, blob);
+                            resolve();
+                        }, 'image/png'));
+                        blobPromises.push(promise);
+                    }
+                    await Promise.all(blobPromises);
+                    const zipBlob = await zip.generateAsync({ type: 'blob' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(zipBlob);
+                    link.download = `${cardTitleInput.value || 'dialogue_slices'}.zip`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                } catch(e) { console.error(e); alert('生成切片失败，请查看控制台。'); } finally {
+                    allElements.previewAreaWrapper.style.height = originalWrapperHeight;
+                    downloadBtn.disabled = false;
+                    downloadBtn.textContent = '下载分享图';
+                }
+            }
+
+            // 初始化
+            allElements.aspectRatioSelector.value = '9/16';
+            allElements.themeSelector.value = 'vintage-bubble';
+            updatePreview();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分班策略配置与监控平台 v2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f3f4f6; }
+        .sidebar-item.active { background-color: #e0e7ff; color: #4338ca; border-right: 3px solid #4338ca; }
+        .rule-card { transition: all 0.2s; }
+        .rule-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .arrow-down { height: 24px; width: 2px; background-color: #cbd5e1; margin: 0 auto; position: relative; }
+        .arrow-down::after { content: ''; position: absolute; bottom: 0; left: -4px; border-width: 5px 5px 0; border-style: solid; border-color: #cbd5e1 transparent transparent transparent; }
+        /* 模拟拖拽样式 */
+        .draggable { cursor: move; }
+    </style>
+</head>
+<body>
+
+<div id="app" class="flex h-screen overflow-hidden">
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+        <div class="p-6 flex items-center border-b border-gray-100">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold mr-3">A</div>
+            <span class="font-bold text-gray-800 text-lg">Allocation v2.0</span>
+        </div>
+        <nav class="flex-1 p-4 space-y-1">
+            <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-item flex items-center px-4 py-3 text-gray-600 rounded-md hover:bg-gray-50 group transition-colors">
+                <i class="fas fa-chart-pie w-5 h-5 mr-3"></i>
+                分班大盘监控
+            </a>
+            <a href="#" onclick="switchTab('config')" id="nav-config" class="sidebar-item active flex items-center px-4 py-3 text-gray-600 rounded-md hover:bg-gray-50 group transition-colors">
+                <i class="fas fa-cogs w-5 h-5 mr-3"></i>
+                策略配置中心
+            </a>
+            <a href="#" onclick="switchTab('pool')" id="nav-pool" class="sidebar-item flex items-center px-4 py-3 text-gray-600 rounded-md hover:bg-gray-50 group transition-colors">
+                <i class="fas fa-filter w-5 h-5 mr-3"></i>
+                流量池管理
+                <span class="ml-auto bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-medium">128</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-100">
+            <div class="flex items-center">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=random" class="w-8 h-8 rounded-full">
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-700">产品管理员</p>
+                    <p class="text-xs text-gray-500">Ops Team</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-8">
+        
+        <div id="view-config" class="block">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">策略组配置 (Strategy Profile)</h1>
+                    <p class="text-gray-500 text-sm mt-1">定义分班规则链的执行顺序与熔断机制。</p>
+                </div>
+                <div class="flex space-x-3">
+                    <select class="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option>2025年春季学期 (当前生效)</option>
+                        <option>2024年秋季学期 (已归档)</option>
+                    </select>
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        <i class="fas fa-save mr-2"></i>保存发布
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-6">
+                <div class="col-span-4 space-y-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="font-bold text-gray-800 mb-4">策略组属性</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">策略组名称</label>
+                                <input type="text" value="2025春-大盘标准分班策略" class="w-full border-gray-300 rounded-md border p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">适用业务线</label>
+                                <div class="flex gap-2">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">大盘年课</span>
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">长期班</span>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-gray-100">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-indigo-600 rounded transition duration-150 ease-in-out">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-900">开启冷启动囤积 (Hold)</span>
+                                        <p class="text-xs text-gray-500">开启后，所有订单进入冷启动池，不执行实时分班。</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-xl border border-blue-100 p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-600 mt-0.5 mr-2"></i>
+                            <div class="text-sm text-blue-800">
+                                <p class="font-bold mb-1">模拟运行</p>
+                                <p>建议在发布前，使用"模拟器"跑测历史数据，验证策略覆盖率和兜底逻辑。</p>
+                                <button class="mt-2 text-blue-600 hover:text-blue-800 font-medium text-xs underline">打开模拟器 ></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-span-8">
+                    <div class="bg-gray-100 rounded-xl p-6 border border-gray-200 inner-shadow">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-gray-700">规则执行链 (Rule Chain)</h3>
+                            <button class="text-indigo-600 text-sm font-medium hover:text-indigo-800">+ 添加规则节点</button>
+                        </div>
+
+                        <div class="rule-card bg-white rounded-lg border-l-4 border-red-500 p-4 shadow-sm relative mb-2">
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-center">
+                                    <div class="bg-red-50 text-red-600 w-8 h-8 rounded flex items-center justify-center font-bold text-sm mr-3">1</div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">硬性约束校验 (Hard Constraints)</h4>
+                                        <p class="text-xs text-gray-500">检查黑名单、年级不符、重复购买</p>
+                                    </div>
+                                </div>
+                                <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">不可移动</span>
+                            </div>
+                            <div class="mt-3 flex items-center text-xs text-gray-500 border-t border-gray-50 pt-2">
+                                <span class="mr-2">❌ 校验失败：</span>
+                                <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded border border-red-200 font-mono">Throw Error (拒绝交易)</span>
+                            </div>
+                        </div>
+
+                        <div class="arrow-down mb-2"></div>
+
+                        <div class="rule-card draggable bg-white rounded-lg border-l-4 border-indigo-500 p-4 shadow-sm relative mb-2 group">
+                            <div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="text-gray-400 hover:text-gray-600"><i class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-center">
+                                    <div class="bg-indigo-50 text-indigo-600 w-8 h-8 rounded flex items-center justify-center font-bold text-sm mr-3">2</div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">续报锁师策略 (Renewal Lock)</h4>
+                                        <p class="text-xs text-gray-500">参数: 强制锁定原主讲, 允许跨期次</p>
+                                    </div>
+                                </div>
+                                <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">高优先级</span>
+                            </div>
+                            <div class="mt-3 flex items-center text-xs text-gray-500 border-t border-gray-50 pt-2">
+                                <span class="mr-2">⚠️ 满员/未命中：</span>
+                                <select class="bg-gray-50 border border-gray-200 rounded text-xs px-1 py-0.5 text-gray-700">
+                                    <option>Next (执行下一条)</option>
+                                    <option>Pool (进入溢出池)</option>
+                                </select>
+                                <span class="ml-2 text-gray-400">→ 推荐继续尝试地域策略</span>
+                            </div>
+                        </div>
+
+                        <div class="arrow-down mb-2"></div>
+
+                        <div class="rule-card draggable bg-white rounded-lg border-l-4 border-blue-500 p-4 shadow-sm relative mb-2 group">
+                            <div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="text-gray-400 hover:text-gray-600"><i class="fas fa-ellipsis-h"></i></button>
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-center">
+                                    <div class="bg-blue-50 text-blue-600 w-8 h-8 rounded flex items-center justify-center font-bold text-sm mr-3">3</div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">地域聚类策略 (Geo Cluster)</h4>
+                                        <p class="text-xs text-gray-500">参数: 同省优先 > 同大区优先</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center text-xs text-gray-500 border-t border-gray-50 pt-2">
+                                <span class="mr-2">⚠️ 满员/未命中：</span>
+                                <span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded border border-gray-200 font-mono">Next (执行下一条)</span>
+                            </div>
+                        </div>
+
+                        <div class="arrow-down mb-2"></div>
+
+                        <div class="rule-card bg-white rounded-lg border-l-4 border-gray-400 p-4 shadow-sm relative">
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-center">
+                                    <div class="bg-gray-100 text-gray-600 w-8 h-8 rounded flex items-center justify-center font-bold text-sm mr-3">4</div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">全局兜底 (Global Fallback)</h4>
+                                        <p class="text-xs text-gray-500">逻辑: 负载均衡 (Load Balance) 填坑模式</p>
+                                    </div>
+                                </div>
+                                <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">终态</span>
+                            </div>
+                            <div class="mt-3 flex items-center text-xs text-gray-500 border-t border-gray-50 pt-2">
+                                <span class="mr-2">❌ 仍无法分配：</span>
+                                <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded border border-yellow-200 font-mono">→ Pool (进入溢出池)</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-pool" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">流量池管理 (Traffic Pool)</h1>
+                    <p class="text-gray-500 text-sm mt-1">处理分班阻塞、溢出及异常用户。</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg text-sm hover:bg-gray-50">
+                        <i class="fas fa-sync-alt mr-1"></i> 刷新数据
+                    </button>
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg text-sm font-medium shadow-sm">
+                        <i class="fas fa-play mr-2"></i>批量重试 (32)
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div class="text-gray-500 text-xs font-medium uppercase mb-1">总池内人数</div>
+                    <div class="text-2xl font-bold text-gray-800">128</div>
+                    <div class="text-xs text-green-600 mt-1"><i class="fas fa-arrow-down"></i> 较上小时 -12%</div>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-xl shadow-sm border-2 border-yellow-400 relative overflow-hidden cursor-pointer">
+                    <div class="absolute right-0 top-0 p-2 opacity-10"><i class="fas fa-layer-group text-4xl text-yellow-800"></i></div>
+                    <div class="text-yellow-800 text-xs font-bold uppercase mb-1">溢出池 (Overflow)</div>
+                    <div class="text-2xl font-bold text-yellow-900">32</div>
+                    <div class="text-xs text-yellow-700 mt-1">库存不足 / 削峰等待</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:border-blue-300 transition-colors">
+                    <div class="text-gray-500 text-xs font-medium uppercase mb-1">冷启动池 (Hold)</div>
+                    <div class="text-2xl font-bold text-gray-800">90</div>
+                    <div class="text-xs text-gray-400 mt-1">等待开板指令</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:border-red-300 transition-colors">
+                    <div class="text-gray-500 text-xs font-medium uppercase mb-1">异常池 (Error)</div>
+                    <div class="text-2xl font-bold text-red-600">6</div>
+                    <div class="text-xs text-gray-400 mt-1">数据校验失败</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <div class="font-bold text-gray-700">溢出池用户列表 (No Stock)</div>
+                    <div class="flex items-center space-x-2">
+                        <input placeholder="搜索用户ID/订单号" class="border border-gray-300 rounded-md px-3 py-1 text-sm w-64 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <table class="w-full text-sm text-left">
+                    <thead class="text-gray-500 bg-gray-50 border-b border-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 font-medium"><input type="checkbox" class="rounded border-gray-300 text-indigo-600"></th>
+                            <th class="px-6 py-3 font-medium">用户ID / 姓名</th>
+                            <th class="px-6 py-3 font-medium">入池时间 / 等待时长</th>
+                            <th class="px-6 py-3 font-medium">入池原因 (Reason Tag)</th>
+                            <th class="px-6 py-3 font-medium">最后命中策略</th>
+                            <th class="px-6 py-3 font-medium text-right">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4"><input type="checkbox" class="rounded border-gray-300 text-indigo-600"></td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-gray-900">U_9827321</div>
+                                <div class="text-xs text-gray-500">张三 (五年级)</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div>10:23:45</div>
+                                <div class="text-xs text-red-500 font-medium">已等待 45m</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">NO_STOCK</span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500">
+                                续报锁师策略 <span class="text-xs bg-gray-100 px-1 rounded">失败</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button class="text-indigo-600 hover:text-indigo-900 font-medium text-xs">单条重试</button>
+                                <span class="text-gray-300 mx-2">|</span>
+                                <button class="text-gray-500 hover:text-gray-700 font-medium text-xs">详情</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4"><input type="checkbox" class="rounded border-gray-300 text-indigo-600"></td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-gray-900">U_9827325</div>
+                                <div class="text-xs text-gray-500">李四 (五年级)</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div>10:45:12</div>
+                                <div class="text-xs text-yellow-600">已等待 23m</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">NO_STOCK</span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500">
+                                地域聚类 <span class="text-xs bg-gray-100 px-1 rounded">失败</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button class="text-indigo-600 hover:text-indigo-900 font-medium text-xs">单条重试</button>
+                                <span class="text-gray-300 mx-2">|</span>
+                                <button class="text-gray-500 hover:text-gray-700 font-medium text-xs">详情</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="px-6 py-3 border-t border-gray-100 bg-gray-50 flex justify-center">
+                    <button class="text-gray-500 text-sm hover:text-gray-700">加载更多...</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="view-dashboard" class="hidden text-center py-20">
+            <div class="text-gray-400 mb-4"><i class="fas fa-chart-line text-6xl"></i></div>
+            <h2 class="text-xl font-bold text-gray-600">分班大盘监控看板</h2>
+            <p class="text-gray-500">此处展示实时分班成功率、SLA达标率等图表</p>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    // 简单的 Tab 切换逻辑
+    function switchTab(tabId) {
+        // 隐藏所有视图
+        document.getElementById('view-dashboard').classList.add('hidden');
+        document.getElementById('view-config').classList.add('hidden');
+        document.getElementById('view-config').classList.remove('block');
+        document.getElementById('view-pool').classList.add('hidden');
+
+        // 显示目标视图
+        if(tabId === 'config') document.getElementById('view-config').classList.add('block');
+        document.getElementById('view-' + tabId).classList.remove('hidden');
+
+        // 更新导航状态
+        document.querySelectorAll('.sidebar-item').forEach(el => {
+            el.classList.remove('active', 'bg-indigo-50', 'text-indigo-700', 'border-r-4', 'border-indigo-600');
+            el.classList.add('text-gray-600');
+        });
+        document.getElementById('nav-' + tabId).classList.add('active');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+# ===================
+# Node.js / npm
+# ===================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ===================
+# Build outputs
+# ===================
+dist/
+build/
+*.tgz
+*.local
+
+# ===================
+# IDE & Editor
+# ===================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===================
+# System files
+# ===================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ===================
+# Assets & Media
+# ===================
+# Writing folder assets (images, etc)
+Writing/assets/
+Writing/**/assets/
+Writing/**/i/
+Writing/**/image/
+
+# Images in other folders
+**/image/
+**/images/
+**/i/
+
+# Video files
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.flv
+*.wmv
+
+# Audio files
+*.mp3
+*.wav
+*.flac
+*.aac
+
+# Large binary files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Documents (usually not needed in version control)
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+
+# ===================
+# Logs & Temporary
+# ===================
+*.log
+logs/
+*.tmp
+*.temp
+*.cache
+
+# ===================
+# Environment & Secrets
+# ===================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.secret
+
+# ===================
+# Testing & Coverage
+# ===================
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+
+# ===================
+# OS generated files
+# ===================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
