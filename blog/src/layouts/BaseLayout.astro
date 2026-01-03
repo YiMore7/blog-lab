@@ -1,0 +1,321 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "产品经理的思考与实践" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <script is:inline>
+      (function() {
+        console.log('Theme toggle script loaded');
+
+        function toggleTheme() {
+          const html = document.documentElement;
+          const isDark = html.getAttribute('data-theme') === 'dark';
+          const newTheme = isDark ? 'light' : 'dark';
+
+          html.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+
+          const themeButton = document.getElementById('theme-toggle');
+          if (themeButton) {
+            const icon = themeButton.querySelector('.theme-icon');
+            if (icon) {
+              icon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            }
+          }
+
+          console.log('Theme switched to:', newTheme);
+        }
+
+        function initTheme() {
+          const savedTheme = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+
+          document.documentElement.setAttribute('data-theme', theme);
+
+          const themeButton = document.getElementById('theme-toggle');
+          if (themeButton) {
+            const icon = themeButton.querySelector('.theme-icon');
+            if (icon) {
+              icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+            themeButton.addEventListener('click', toggleTheme);
+            console.log('Theme button initialized');
+          } else {
+            console.error('Theme toggle button not found');
+          }
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing...');
+            initTheme();
+          });
+        } else {
+          console.log('DOM already ready, initializing...');
+          initTheme();
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-container">
+        <a href="/blog/" class="logo">YiM's Blog</a>
+        <nav class="nav">
+          <button id="theme-toggle" class="nav-button" aria-label="Toggle theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main">
+      <slot />
+    </main>
+
+    <footer class="footer">
+      <p>&copy; {new Date().getFullYear()} YiM. 保持记录，意义自然浮现。</p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    /* 背景色 - 更柔和的渐变背景 */
+    --bg-primary: #fafbfc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f5f7fa;
+
+    /* 文字颜色 - 更舒适的对比度 */
+    --text-primary: #1a202c;
+    --text-secondary: #4a5568;
+    --text-tertiary: #718096;
+    --text-muted: #a0aec0;
+
+    /* 强调色 - 更现代的紫蓝色调 */
+    --accent-primary: #6366f1;
+    --accent-secondary: #8b5cf6;
+    --accent-hover: #4f46e5;
+    --accent-light: #eef2ff;
+
+    /* 功能色 */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+
+    /* 边框和分割线 */
+    --border-light: #e2e8f0;
+    --border-medium: #cbd5e0;
+
+    /* 阴影 - 更柔和自然 */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* 圆角 */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+  }
+
+  [data-theme="dark"] {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --text-muted: #64748b;
+
+    --accent-primary: #818cf8;
+    --accent-secondary: #a78bfa;
+    --accent-hover: #6366f1;
+    --accent-light: #312e81;
+
+    --success: #34d399;
+    --warning: #fbbf24;
+    --error: #f87171;
+
+    --border-light: #334155;
+    --border-medium: #475569;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+      sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    scroll-behavior: smooth;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  a:hover {
+    color: var(--accent-primary);
+  }
+
+  .header {
+    background: rgba(255, 255, 255, 0.8);
+    border-bottom: 1px solid var(--border-light);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px) saturate(180%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  [data-theme="dark"] .header {
+    background: rgba(30, 41, 59, 0.8);
+    border-bottom-color: var(--border-light);
+  }
+
+  .header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .logo:hover {
+    transform: scale(1.05);
+  }
+
+  .nav {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .nav-button {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .nav-button:hover {
+    background: var(--accent-light);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .nav-button:active {
+    transform: translateY(0);
+  }
+
+  .nav-button .theme-icon {
+    font-size: 1.125rem;
+    display: block;
+  }
+
+  .nav-button .lang-text {
+    font-size: 0.875rem;
+  }
+
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    min-height: calc(100vh - 200px);
+  }
+
+  .footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+    text-align: center;
+    padding: 2.5rem 2rem;
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @media (max-width: 768px) {
+    .header-container {
+      padding: 1rem 1.5rem;
+    }
+
+    .main {
+      padding: 2.5rem 1.5rem;
+    }
+
+    .nav {
+      gap: 0.5rem;
+    }
+
+    .nav-button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+  }
+</style>

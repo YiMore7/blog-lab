@@ -1,0 +1,874 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = (await getCollection('blog'))
+  .filter(post => !post.data.draft)
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+
+const postsByCategory = {
+  product: allPosts.filter(post => post.data.category === 'product').slice(0, 3),
+  ai: allPosts.filter(post => post.data.category === 'ai').slice(0, 3),
+  life: allPosts.filter(post => post.data.category === 'life').slice(0, 3)
+};
+
+const formatDate = (date: Date) => {
+  return new Date(date).toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+};
+
+// 项目数据 - 这里你可以添加你的作品集
+const projects = [
+  {
+    title: 'AI 写作助手',
+    description: '基于 Cursor 和 Claude Code 构建的智能写作辅助工具',
+    tags: ['AI', '工具'],
+    status: '开发中',
+    link: '#'
+  },
+  {
+    title: '内容管理系统',
+    description: '自动格式化和发布写作内容的一站式平台',
+    tags: ['工具', '效率'],
+    status: '规划中',
+    link: '#'
+  }
+];
+---
+
+<BaseLayout title="Yim's Blog">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">你好，我是 YiM 👋</h1>
+      <p class="hero-subtitle">本职是一名产品经理，同时也是一名 Writer & Builder</p>
+      <p class="hero-description">
+        在这里记录我的产品设计思考、AI探索实践，生活近况<br>
+        以及我正在构建的工具和产品
+      </p>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">🚀 我在构建</h2>
+      <p class="section-subtitle">探索边界，创造工具</p>
+    </div>
+    <div class="project-grid">
+      {projects.map(project => (
+        <a href={project.link} class="project-card">
+          <article>
+            <div class="project-header">
+              <div class="project-status" data-status={project.status}>
+                {project.status}
+              </div>
+            </div>
+            <h3 class="project-title">{project.title}</h3>
+            <p class="project-description">{project.description}</p>
+            <div class="project-tags">
+              {project.tags.map(tag => (
+                <span class="tag">{tag}</span>
+              ))}
+            </div>
+          </article>
+        </a>
+      ))}
+      <!-- 添加更多项目占位符 -->
+      <div class="project-card placeholder-card">
+        <article>
+          <div class="placeholder-content">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <p>更多项目开发中...</p>
+            <p class="placeholder-hint">持续构建，敬请期待</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Writing Section -->
+  <section class:list={["section", { "no-content": allPosts.length === 0 }]}>
+    <div class="section-header">
+      <h2 class="section-title">✍️ 最新文章</h2>
+      <p class="section-subtitle">思考 · 探索 · 记录</p>
+    </div>
+    {allPosts.length > 0 && (
+      <div class="post-grid">
+        {allPosts.slice(0, 3).map(post => (
+          <a href={`/blog/posts/${post.slug}/`} class="post-card">
+            <article>
+              <div class="post-meta">
+                <span class="post-category">
+                  {post.data.category === 'product' ? '工作' :
+                    post.data.category === 'ai' ? 'AI' : '生活'}
+                </span>
+                <time class="post-date">{formatDate(post.data.publishDate)}</time>
+              </div>
+              <h3 class="post-title">{post.data.title}</h3>
+              <p class="post-excerpt">{post.data.description}</p>
+            </article>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <!-- More by Category -->
+  <section class="section">
+    <div class="category-grid">
+      <div class="category-column">
+        <h3 class="category-title">
+          <span class="emoji">💡</span>
+          工作思考
+        </h3>
+        <div class="category-list">
+          {postsByCategory.product.map(post => (
+            <a href={`/blog/posts/${post.slug}/`} class="category-item">
+              <span class="item-title">{post.data.title}</span>
+              <time class="item-date">{formatDate(post.data.publishDate)}</time>
+            </a>
+          ))}
+          {postsByCategory.product.length === 0 && (
+            <p class="empty-hint">暂无内容</p>
+          )}
+        </div>
+      </div>
+
+      <div class="category-column">
+        <h3 class="category-title">
+          <span class="emoji">🤖</span>
+          AI 探索
+        </h3>
+        <div class="category-list">
+          {postsByCategory.ai.map(post => (
+            <a href={`/blog/posts/${post.slug}/`} class="category-item">
+              <span class="item-title">{post.data.title}</span>
+              <time class="item-date">{formatDate(post.data.publishDate)}</time>
+            </a>
+          ))}
+          {postsByCategory.ai.length === 0 && (
+            <p class="empty-hint">暂无内容</p>
+          )}
+        </div>
+      </div>
+
+      <div class="category-column">
+        <h3 class="category-title">
+          <span class="emoji">🌱</span>
+          生活记录
+        </h3>
+        <div class="category-list">
+          {postsByCategory.life.map(post => (
+            <a href={`/blog/posts/${post.slug}/`} class="category-item">
+              <span class="item-title">{post.data.title}</span>
+              <time class="item-date">{formatDate(post.data.publishDate)}</time>
+            </a>
+          ))}
+          {postsByCategory.life.length === 0 && (
+            <p class="empty-hint">暂无内容</p>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact-section">
+    <div class="contact-card">
+      <h2 class="contact-title">保持联系</h2>
+      <p class="contact-desc">欢迎与我交流，分享你的想法和见解</p>
+      <div class="contact-links">
+        <button class="contact-link" data-contact="wechat">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          微信
+        </button>
+        <button class="contact-link" data-contact="official">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          公众号
+        </button>
+        <button class="contact-link" data-contact="xiaohongshu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          小红书
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="contact-modal" class="modal">
+      <div class="modal-content">
+        <button class="modal-close">&times;</button>
+        <h3 id="modal-title" class="modal-title"></h3>
+        <div id="modal-body" class="modal-body">
+          <p id="modal-text"></p>
+          <div id="modal-qr" class="modal-qr"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const contactData = {
+      wechat: {
+        title: '微信',
+        text: '微信号: yiming_email',
+        qr: '暂无二维码（请添加您的微信二维码图片）'
+      },
+      official: {
+        title: '公众号',
+        text: '公众号名称: YiM的产品笔记',
+        qr: '暂无二维码（请添加您的公众号二维码图片）'
+      },
+      xiaohongshu: {
+        title: '小红书',
+        text: '小红书ID: YiM',
+        qr: '暂无二维码（请添加您的小红书二维码图片）'
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('contact-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalText = document.getElementById('modal-text');
+      const modalQr = document.getElementById('modal-qr');
+      const modalClose = document.querySelector('.modal-close');
+      const contactLinks = document.querySelectorAll('.contact-link[data-contact]');
+
+      contactLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          const type = link.getAttribute('data-contact');
+          const data = contactData[type];
+
+          modalTitle.textContent = data.title;
+          modalText.textContent = data.text;
+          modalQr.textContent = data.qr;
+
+          modal.classList.add('active');
+        });
+      });
+
+      modalClose.addEventListener('click', () => {
+        modal.classList.remove('active');
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--accent-light) 0%, transparent 70%);
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .hero-content {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: 1.375rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-description {
+    font-size: 1.0625rem;
+    color: var(--text-tertiary);
+    line-height: 1.8;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .section {
+    margin-bottom: 5rem;
+  }
+
+  .section.no-content {
+    margin-bottom: 0.5rem;
+  }
+
+  .section-header {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  .section-subtitle {
+    font-size: 1.0625rem;
+    color: var(--text-tertiary);
+    font-weight: 400;
+  }
+
+  /* Projects Styles */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .project-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-light);
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--accent-primary);
+  }
+
+  .project-card:hover::before {
+    opacity: 1;
+  }
+
+  .placeholder-card {
+    border-style: dashed;
+    border-color: var(--border-medium);
+    cursor: default;
+    background: var(--bg-tertiary);
+  }
+
+  .placeholder-card:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border-medium);
+  }
+
+  .placeholder-card::before {
+    display: none;
+  }
+
+  .placeholder-content {
+    text-align: center;
+    padding: 1.5rem 0;
+    color: var(--text-tertiary);
+  }
+
+  .placeholder-content svg {
+    margin-bottom: 1rem;
+    opacity: 0.4;
+    color: var(--text-muted);
+  }
+
+  .placeholder-content p {
+    color: var(--text-tertiary);
+    font-weight: 500;
+  }
+
+  .placeholder-hint {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+    margin-top: 0.5rem !important;
+  }
+
+  .project-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.25rem;
+  }
+
+  .project-status {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .project-status[data-status="开发中"] {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .project-status[data-status="规划中"] {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+
+  .project-status[data-status="已完成"] {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  [data-theme="dark"] .project-status[data-status="开发中"] {
+    background: #78350f;
+    color: #fef3c7;
+  }
+
+  [data-theme="dark"] .project-status[data-status="规划中"] {
+    background: #312e81;
+    color: #e0e7ff;
+  }
+
+  [data-theme="dark"] .project-status[data-status="已完成"] {
+    background: #064e3b;
+    color: #d1fae5;
+  }
+
+  .project-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.875rem;
+    letter-spacing: -0.01em;
+  }
+
+  .project-description {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 1.25rem;
+  }
+
+  .project-tags {
+    display: flex;
+    gap: 0.625rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.875rem;
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .project-card:hover .tag {
+    background: var(--accent-light);
+    color: var(--accent-primary);
+  }
+
+  /* Posts Styles */
+  .post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .post-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-light);
+    display: block;
+    position: relative;
+  }
+
+  .post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent-primary);
+  }
+
+  .post-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    gap: 0.75rem;
+  }
+
+  .post-category {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.875rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .post-date {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .post-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.875rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    letter-spacing: -0.01em;
+  }
+
+  .post-excerpt {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Category Columns */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .category-column {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    border: 1px solid var(--border-light);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .category-column:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .category-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .emoji {
+    font-size: 1.5rem;
+  }
+
+  .category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem 1rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+  }
+
+  .category-item:hover {
+    background: var(--accent-light);
+    transform: translateX(4px);
+  }
+
+  .category-item:hover .item-title {
+    color: var(--accent-primary);
+  }
+
+  .item-title {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    flex: 1;
+    margin-right: 1rem;
+    transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .item-date {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    padding: 1.5rem;
+    font-style: italic;
+  }
+
+  /* Contact */
+  .contact-section {
+    margin-top: 5rem;
+  }
+
+  .contact-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .contact-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--accent-light) 0%, transparent 50%);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .contact-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    position: relative;
+    color: var(--text-primary);
+    z-index: 1;
+  }
+
+  .contact-desc {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+    color: var(--text-secondary);
+    z-index: 1;
+  }
+
+  .contact-links {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  .contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    background: var(--bg-tertiary);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-light);
+  }
+
+  .contact-link:hover {
+    background: var(--accent-light);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .contact-link svg {
+    stroke: currentColor;
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+  }
+
+  .modal-content {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: 2.5rem;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-light);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .modal.active .modal-content {
+    transform: scale(1);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.5rem;
+    transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .modal-close:hover {
+    color: var(--text-primary);
+  }
+
+  .modal-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-body {
+    text-align: center;
+  }
+
+  .modal-body p {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-qr {
+    padding: 2rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    color: var(--text-tertiary);
+    font-size: 0.9375rem;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2.5rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+    }
+
+    .section-title {
+      font-size: 1.875rem;
+    }
+
+    .project-grid,
+    .post-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .category-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .contact-card {
+      padding: 2rem 1.5rem;
+    }
+
+    .contact-title {
+      font-size: 1.875rem;
+    }
+
+    .contact-links {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .contact-link {
+      justify-content: center;
+    }
+  }
+</style>

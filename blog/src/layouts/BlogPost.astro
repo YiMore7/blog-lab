@@ -1,0 +1,250 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  publishDate: Date;
+  category: string;
+}
+
+const { title, description, publishDate, category } = Astro.props;
+
+const formatDate = (date: Date) => {
+  return new Date(date).toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+const categoryMap = {
+  life: '生活记录',
+  product: '工作思考',
+  ai: 'AI探索'
+};
+---
+
+<BaseLayout title={title}>
+  <article class="article">
+    <header class="article-header">
+      <div class="article-meta">
+        <span class="category-badge">{categoryMap[category]}</span>
+        <time class="article-date">{formatDate(publishDate)}</time>
+      </div>
+      <h1 class="article-title">{title}</h1>
+      <p class="article-description">{description}</p>
+    </header>
+
+    <div class="article-content">
+      <slot />
+    </div>
+
+    <footer class="article-footer">
+      <a href="/blog/" class="back-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        返回首页
+      </a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .article-header {
+    margin-bottom: 3.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .category-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    letter-spacing: 0.3px;
+  }
+
+  .article-date {
+    font-size: 0.9375rem;
+    color: var(--text-tertiary);
+    font-weight: 500;
+  }
+
+  .article-title {
+    font-size: 2.75rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+  }
+
+  .article-description {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  .article-content {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+  }
+
+  .article-content :global(h2) {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-top: 3.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .article-content :global(h3) {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 1.25rem;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+
+  .article-content :global(p) {
+    margin-bottom: 1.75rem;
+    color: var(--text-secondary);
+  }
+
+  .article-content :global(ul),
+  .article-content :global(ol) {
+    margin-left: 2rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .article-content :global(li) {
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  .article-content :global(code) {
+    background: var(--bg-tertiary);
+    color: var(--accent-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9em;
+    font-family: 'Monaco', 'Courier New', monospace;
+    border: 1px solid var(--border-light);
+    font-weight: 500;
+  }
+
+  .article-content :global(pre) {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 1.75rem;
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+    margin-bottom: 1.75rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+  }
+
+  [data-theme="dark"] .article-content :global(pre) {
+    background: #0d1117;
+    color: #c9d1d9;
+  }
+
+  .article-content :global(pre code) {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    font-size: 0.9375rem;
+    border: none;
+  }
+
+  .article-content :global(blockquote) {
+    border-left: 4px solid var(--accent-primary);
+    padding: 1.25rem 1.75rem;
+    margin: 2.5rem 0;
+    background: var(--bg-tertiary);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .article-content :global(img) {
+    max-width: 100%;
+    height: auto;
+    margin: 2.5rem 0;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .article-content :global(hr) {
+    border: none;
+    border-top: 1px solid var(--border-light);
+    margin: 3.5rem 0;
+  }
+
+  .article-footer {
+    margin-top: 5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    padding: 0.875rem 1.75rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-light);
+  }
+
+  .back-button:hover {
+    color: var(--accent-primary);
+    background: var(--accent-light);
+    border-color: var(--accent-primary);
+    transform: translateX(-4px);
+  }
+
+  @media (max-width: 768px) {
+    .article-title {
+      font-size: 2.25rem;
+    }
+
+    .article-description {
+      font-size: 1.125rem;
+    }
+
+    .article-content :global(h2) {
+      font-size: 1.75rem;
+    }
+
+    .article-content :global(h3) {
+      font-size: 1.375rem;
+    }
+  }
+</style>
