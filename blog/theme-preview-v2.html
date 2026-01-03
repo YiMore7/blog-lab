@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博客色系预览 - 更多方案</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f7fa;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .preview-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 2.5rem;
+      color: #1a202c;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin-bottom: 3rem;
+      color: #4a5568;
+      font-size: 1.1rem;
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .theme-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .theme-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .theme-header {
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .theme-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.15;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .theme-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      position: relative;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .theme-description {
+      color: #64748b;
+      font-size: 0.9rem;
+      position: relative;
+    }
+
+    .theme-preview {
+      padding: 2rem;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .color-palette {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .color-swatch {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.1);
+    }
+
+    .demo-ui {
+      background: var(--bg-primary);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .demo-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .demo-logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .demo-button {
+      margin-left: auto;
+      padding: 0.5rem 1rem;
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .demo-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .demo-badge {
+      display: inline-block;
+      padding: 0.375rem 0.875rem;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .demo-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .demo-text {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.7;
+    }
+
+    .demo-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .demo-tag {
+      padding: 0.375rem 0.875rem;
+      background: var(--tag-bg);
+      color: var(--accent-primary);
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+    }
+
+    /* Elegant Slate - 优雅高级 */
+    .elegant-slate {
+      --accent-primary: #475569;
+      --accent-secondary: #64748b;
+      --bg-primary: #fafafa;
+      --card-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --border-color: #e2e8f0;
+      --tag-bg: #f1f5f9;
+    }
+
+    /* Vibrant Orange - 活力橙 */
+    .vibrant-orange {
+      --accent-primary: #ea580c;
+      --accent-secondary: #f97316;
+      --bg-primary: #fff7ed;
+      --card-bg: #ffffff;
+      --text-primary: #1a1625;
+      --text-secondary: #431407;
+      --border-color: #fed7aa;
+      --tag-bg: #ffedd5;
+    }
+
+    /* Mint Fresh - 清新薄荷 */
+    .mint-fresh {
+      --accent-primary: #0d9488;
+      --accent-secondary: #14b8a6;
+      --bg-primary: #f0fdfa;
+      --card-bg: #ffffff;
+      --text-primary: #134e4a;
+      --text-secondary: #0f766e;
+      --border-color: #ccfbf1;
+      --tag-bg: #ccfbf1;
+    }
+
+    /* Royal Indigo - 皇家靛蓝 */
+    .royal-indigo {
+      --accent-primary: #4f46e5;
+      --accent-secondary: #7c3aed;
+      --bg-primary: #f5f3ff;
+      --card-bg: #ffffff;
+      --text-primary: #1e1b4b;
+      --text-secondary: #312e81;
+      --border-color: #ddd6fe;
+      --tag-bg: #ede9fe;
+    }
+
+    /* Earthy Brown - 大地棕 */
+    .earthy-brown {
+      --accent-primary: #78350f;
+      --accent-secondary: #a16207;
+      --bg-primary: #fefce8;
+      --card-bg: #ffffff;
+      --text-primary: #1c1917;
+      --text-secondary: #44403c;
+      --border-color: #fde68a;
+      --tag-bg: #fef3c7;
+    }
+
+    /* Crimson Red - 雅致红 */
+    .crimson-red {
+      --accent-primary: #be123c;
+      --accent-secondary: #e11d48;
+      --bg-primary: #fff1f2;
+      --card-bg: #ffffff;
+      --text-primary: #1a0509;
+      --text-secondary: #4c0519;
+      --border-color: #fecdd3;
+      --tag-bg: #ffe4e6;
+    }
+
+    /* Monochrome Gold - 黑金 */
+    .monochrome-gold {
+      --accent-primary: #b45309;
+      --accent-secondary: #d97706;
+      --bg-primary: #fafafa;
+      --card-bg: #ffffff;
+      --text-primary: #18181b;
+      --text-secondary: #27272a;
+      --border-color: #e4e4e7;
+      --tag-bg: #fef3c7;
+    }
+
+    /* Teal Ocean - 青蓝海洋 */
+    .teal-ocean {
+      --accent-primary: #0e7490;
+      --accent-secondary: #06b6d4;
+      --bg-primary: #ecfeff;
+      --card-bg: #ffffff;
+      --text-primary: #083344;
+      --text-secondary: #0e7490;
+      --border-color: #a5f3fc;
+      --tag-bg: #cffafe;
+    }
+
+    .theme-section {
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 1.5rem;
+      padding-left: 1rem;
+      border-left: 4px solid #6366f1;
+    }
+
+    @media (max-width: 768px) {
+      .theme-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-container">
+    <h1>🎨 更多色系方案</h1>
+    <p class="subtitle">探索不同风格的配色选择</p>
+
+    <!-- 专业风格 -->
+    <div class="theme-section">
+      <div class="section-title">💼 专业风格</div>
+      <div class="theme-grid">
+        <div class="theme-card elegant-slate">
+          <div class="theme-header">
+            <div class="theme-title">优雅高级灰</div>
+            <div class="theme-description">Elegant Slate · 极简高级</div>
+          </div>
+          <div class="theme-preview">
+            <div class="color-palette">
+              <div class="color-swatch" style="background: #475569;">主色</div>
+              <div class="color-swatch" style="background: #64748b;">辅色</div>
+              <div class="color-swatch" style="background: #334155;">悬停</div>
+              <div class="color-swatch" style="background: #f1f5f9; color: #475569;">浅色</div>
+            </div>
+            <div class="demo-ui">
+              <div class="demo-header">
+                <span class="demo-logo">YiM's Blog</span>
+                <button class="demo-button">🌙</button>
+              </div>
+              <div class="demo-card">
+                <span class="demo-badge">工作思考</span>
+                <div class="demo-title">极简主义的设计哲学</div>
+                <p class="demo-text">少即是多，在设计中去繁就简...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-card monochrome-gold">
+          <div class="theme-header">
+            <div class="theme-title">黑金奢华</div>
+            <div class="theme-description">Monochrome Gold · 典雅尊贵</div>
+          </div>
+          <div class="theme-preview">
+            <div class="color-palette">
+              <div class="color-swatch" style="background: #b45309;">主色</div>
+              <div class="color-swatch" style="background: #d97706;">辅色</div>
+              <div class="color-swatch" style="background: #92400e;">悬停</div>
+              <div class="color-swatch" style="background: #fef3c7; color: #92400e;">浅色</div>
+            </div>
+            <div class="demo-ui">
+              <div class="demo-header">
+                <span class="demo-logo">YiM's Blog</span>
+                <button class="demo-button">🌙</button>
+              </div>
+              <div class="demo-card">
+                <span class="demo-badge">工作思考</span>
+                <div class="demo-title">产品设计的本质</div>
+                <p class="demo-text">探索产品背后的逻辑与美学...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 活力风格 -->
+    <div class="theme-section">
+      <div class="section-title">🔥 活力风格</div>
+      <div class="theme-grid">
+        <div class="theme-card vibrant-orange">
+          <div class="theme-header">
+            <div class="theme-title">活力橙</div>
+            <div class="theme-description">Vibrant Orange · 热情开朗</div>
+          </div>
+          <div class="theme-preview">
+            <div class="color-palette">
+              <div class="color-swatch" style="background: #ea580c;">主色</div>
+              <div class="color-swatch" style="background: #f97316;">辅色</div>
+              <div class="color-swatch" style="background: #c2410c;">悬停</div>
+              <div class="color-swatch" style="background: #ffedd5; color: #c2410c;">浅色</div>
+            </div>
+            <div class="demo-ui">
+              <div class="demo-header">
+                <span class="demo-logo">YiM's Blog</span>
+                <button class="demo-button">🌙</button>
+              </div>
+              <div class="demo-card">
+                <span class="demo-badge">AI探索</span>
+                <div class="demo-title">AI 赋能创造力</div>
+                <p class="demo-text">用 AI 工具释放无限创意可能...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-card crimson-red">
+          <div class="theme-header">
+            <div class="theme-title">雅致红</div>
+            <div class="theme-description">Crimson Red · 热情优雅</div>
+          </div>
+          <div class="theme-preview">
+            <div class="color-palette">
+              <div class="color-swatch" style="background: #be123c;">主色</div>
+              <div class="color-swatch" style="background: #e11d48;">辅色</div>
+              <div class="color-swatch" style="background: #9f1239;">悬停</div>
+              <div class="color-swatch" style="background: #ffe4e6; color: #9f1239;">浅色</div>
+            </div>
+            <div class="demo-ui">
+              <div class="demo-header">
+                <span class="demo-logo">YiM's Blog</span>
+                <button class="demo-button">🌙</button>
+              </div>
+              <div class="demo-card">
+                <span class="demo-badge">生活记录</span>
+                <div class="demo-title">热情生活的每一天</div>
+                <p class="demo-text">记录生活中的美好瞬间...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 清新风格 -->
+    <div class="theme-section">
+      <div class="section-title">🌿 清新风格</div>
+      <div class="theme-grid">
+        <div class="theme-card mint-fresh">
+          <div class="theme-header">
+            <div class="theme-title">清新薄荷</div>
+            <div class="theme-description">Mint Fresh · 自然清爽</div>
+          </div>
+          <div class="theme-preview">
+            <div class="color-palette">
+              <div class="color-swatch" style="background: #0d9488;">主色</div>
+              <div class="color-swatch" style="background: #14b8a6;">辅色</div>
+              <div class="color-swatch" style="background: #0f766e;">悬停</div>
+              <div class="color-swatch" style="background: #ccfbf1; color: #0f766e;">浅色</div>
+            </div>
+            <div class="demo-ui">
+              <div class="demo-header">
+                <span class="demo-logo">YiM's Blog</span>
+                <button class="demo-button">🌙</button>
+              </div>
+              <div class="demo-card">
+                <span class="demo-badge">AI探索</span>
+                <div class="demo-title">清新自然的思考方式</div>
+                <p class="demo-text">用简洁清晰的思路解决复杂问题...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-card teal-ocean">
+          <div class="theme-header">
+            <div class="theme-title">青蓝海洋</div>
+            <div class="theme-description">Teal Ocean · 宁静深邃</div>
+          </div>
+          <div class="theme-preview">
+            <div class="color-palette">
+              <div class="color-swatch" style="background: #0e7490;">主色</div>
+              <div class="color-swatch" style="background: #06b6d4;">辅色</div>
+              <div class="color-swatch" style="background: #155e75;">悬停</div>
+              <div class="color-swatch" style="background: #cffafe; color: #0e7490;">浅色</div>
+            </div>
+            <div class="demo-ui">
+              <div class="demo-header">
+                <span class="demo-logo">YiM's Blog</span>
+                <button class="demo-button">🌙</button>
+              </div>
+              <div class="demo-card">
+                <span class="demo-badge">工作思考</span>
+                <div class="demo-title">深度思考产品价值</div>
+                <p class="demo-text">探索产品背后的深层逻辑...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 温暖风格 -->
+    <div class="theme-section">
+      <div class="section-title">☀️ 温暖风格</div>
+      <div class="theme-grid">
+        <div class="theme-card earthy-brown">
+          <div class="theme-header">
+            <div class="theme-title">大地棕</div>
+            <div class="theme-description">Earthy Brown · 稳重踏实</div>
+          </div>
+          <div class="theme-preview">
+            <div class="color-palette">
+              <div class="color-swatch" style="background: #78350f;">主色</div>
+              <div class="color-swatch" style="background: #a16207;">辅色</div>
+              <div class="color-swatch" style="background: #92400e;">悬停</div>
+              <div class="color-swatch" style="background: #fef3c7; color: #78350f;">浅色</div>
+            </div>
+            <div class="demo-ui">
+              <div class="demo-header">
+                <span class="demo-logo">YiM's Blog</span>
+                <button class="demo-button">🌙</button>
+              </div>
+              <div class="demo-card">
+                <span class="demo-badge">工作思考</span>
+                <div class="demo-title">扎实的产品实践</div>
+                <p class="demo-text">从实践中积累产品经验...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-card royal-indigo">
+          <div class="theme-header">
+            <div class="theme-title">皇家靛蓝</div>
+            <div class="theme-description">Royal Indigo · 典雅尊贵</div>
+          </div>
+          <div class="theme-preview">
+            <div class="color-palette">
+              <div class="color-swatch" style="background: #4f46e5;">主色</div>
+              <div class="color-swatch" style="background: #7c3aed;">辅色</div>
+              <div class="color-swatch" style="background: #4338ca;">悬停</div>
+              <div class="color-swatch" style="background: #ede9fe; color: #4f46e5;">浅色</div>
+            </div>
+            <div class="demo-ui">
+              <div class="demo-header">
+                <span class="demo-logo">YiM's Blog</span>
+                <button class="demo-button">🌙</button>
+              </div>
+              <div class="demo-card">
+                <span class="demo-badge">工作思考</span>
+                <div class="demo-title">构建卓越产品</div>
+                <p class="demo-text">追求产品品质的极致...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

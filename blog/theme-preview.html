@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博客色系预览 - Theme Preview</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f7fa;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .preview-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 2.5rem;
+      color: #1a202c;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin-bottom: 3rem;
+      color: #4a5568;
+      font-size: 1.1rem;
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .theme-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .theme-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .theme-header {
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .theme-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.15;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .theme-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      position: relative;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .theme-description {
+      color: #64748b;
+      font-size: 0.95rem;
+      position: relative;
+    }
+
+    .theme-preview {
+      padding: 2rem;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .color-palette {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      justify-content: center;
+    }
+
+    .color-swatch {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.1);
+    }
+
+    .demo-ui {
+      background: var(--bg-primary);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .demo-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .demo-logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .demo-button {
+      margin-left: auto;
+      padding: 0.5rem 1rem;
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .demo-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .demo-badge {
+      display: inline-block;
+      padding: 0.375rem 0.875rem;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .demo-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .demo-text {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.7;
+    }
+
+    .demo-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .demo-tag {
+      padding: 0.375rem 0.875rem;
+      background: var(--tag-bg);
+      color: var(--accent-primary);
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+    }
+
+    /* Current Theme */
+    .current-theme {
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --bg-primary: #fafbfc;
+      --card-bg: #ffffff;
+      --text-primary: #1a202c;
+      --text-secondary: #4a5568;
+      --border-color: #e2e8f0;
+      --tag-bg: #eef2ff;
+    }
+
+    /* Deep Tech Theme */
+    .deep-tech-theme {
+      --accent-primary: #3b82f6;
+      --accent-secondary: #06b6d4;
+      --bg-primary: #f8fafc;
+      --card-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --border-color: #e2e8f0;
+      --tag-bg: #e0f2fe;
+    }
+
+    /* Warm Professional Theme */
+    .warm-professional-theme {
+      --accent-primary: #8b5cf6;
+      --accent-secondary: #ec4899;
+      --bg-primary: #fdf4ff;
+      --card-bg: #ffffff;
+      --text-primary: #1a1625;
+      --text-secondary: #581c87;
+      --border-color: #f3e8ff;
+      --tag-bg: #fce7f3;
+    }
+
+    /* Nature Explorer Theme */
+    .nature-explorer-theme {
+      --accent-primary: #059669;
+      --accent-secondary: #0891b2;
+      --bg-primary: #f0fdf4;
+      --card-bg: #ffffff;
+      --text-primary: #14532d;
+      --text-secondary: #166534;
+      --border-color: #d1fae5;
+      --tag-bg: #d1fae5;
+    }
+
+    .theme-recommendation {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-top: 3rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+
+    .recommendation-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 1rem;
+    }
+
+    .recommendation-content {
+      color: #78350f;
+      line-height: 1.8;
+    }
+
+    .recommendation-content ul {
+      margin-left: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .recommendation-content li {
+      margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .theme-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .color-palette {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-container">
+    <h1>🎨 博客色系预览</h1>
+    <p class="subtitle">对比当前色系与三个优化方案</p>
+
+    <div class="theme-grid">
+      <!-- Current Theme -->
+      <div class="theme-card current-theme">
+        <div class="theme-header">
+          <div class="theme-title">当前色系</div>
+          <div class="theme-description">紫蓝色渐变 · 现代科技感</div>
+        </div>
+        <div class="theme-preview">
+          <div class="color-palette">
+            <div class="color-swatch" style="background: #6366f1;">主色</div>
+            <div class="color-swatch" style="background: #8b5cf6;">辅色</div>
+            <div class="color-swatch" style="background: #4f46e5;">悬停</div>
+            <div class="color-swatch" style="background: #eef2ff; color: #6366f1;">浅色</div>
+          </div>
+
+          <div class="demo-ui">
+            <div class="demo-header">
+              <span class="demo-logo">YiM's Blog</span>
+              <button class="demo-button">🌙</button>
+            </div>
+
+            <div class="demo-card">
+              <span class="demo-badge">AI探索</span>
+              <div class="demo-title">使用 Cursor 构建个人博客</div>
+              <p class="demo-text">探索 AI 辅助编程的新范式，提升开发效率...</p>
+              <div class="demo-tags">
+                <span class="demo-tag">AI</span>
+                <span class="demo-tag">工具</span>
+              </div>
+            </div>
+
+            <div class="demo-card">
+              <span class="demo-badge">工作思考</span>
+              <div class="demo-title">产品设计思维模型</div>
+              <p class="demo-text">从用户需求出发，构建产品设计的思维框架...</p>
+              <div class="demo-tags">
+                <span class="demo-tag">产品</span>
+                <span class="demo-tag">思考</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deep Tech Theme -->
+      <div class="theme-card deep-tech-theme">
+        <div class="theme-header">
+          <div class="theme-title">方案 1: Deep Tech</div>
+          <div class="theme-description">蓝色+青色 · 清爽活力</div>
+        </div>
+        <div class="theme-preview">
+          <div class="color-palette">
+            <div class="color-swatch" style="background: #3b82f6;">主色</div>
+            <div class="color-swatch" style="background: #06b6d4;">辅色</div>
+            <div class="color-swatch" style="background: #2563eb;">悬停</div>
+            <div class="color-swatch" style="background: #e0f2fe; color: #0369a1;">浅色</div>
+          </div>
+
+          <div class="demo-ui">
+            <div class="demo-header">
+              <span class="demo-logo">YiM's Blog</span>
+              <button class="demo-button">🌙</button>
+            </div>
+
+            <div class="demo-card">
+              <span class="demo-badge">AI探索</span>
+              <div class="demo-title">使用 Cursor 构建个人博客</div>
+              <p class="demo-text">探索 AI 辅助编程的新范式，提升开发效率...</p>
+              <div class="demo-tags">
+                <span class="demo-tag">AI</span>
+                <span class="demo-tag">工具</span>
+              </div>
+            </div>
+
+            <div class="demo-card">
+              <span class="demo-badge">工作思考</span>
+              <div class="demo-title">产品设计思维模型</div>
+              <p class="demo-text">从用户需求出发，构建产品设计的思维框架...</p>
+              <div class="demo-tags">
+                <span class="demo-tag">产品</span>
+                <span class="demo-tag">思考</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warm Professional Theme -->
+      <div class="theme-card warm-professional-theme">
+        <div class="theme-header">
+          <div class="theme-title">方案 2: Warm Professional ⭐</div>
+          <div class="theme-description">紫色+粉色 · 温暖专业</div>
+        </div>
+        <div class="theme-preview">
+          <div class="color-palette">
+            <div class="color-swatch" style="background: #8b5cf6;">主色</div>
+            <div class="color-swatch" style="background: #ec4899;">辅色</div>
+            <div class="color-swatch" style="background: #7c3aed;">悬停</div>
+            <div class="color-swatch" style="background: #fce7f3; color: #be185d;">浅色</div>
+          </div>
+
+          <div class="demo-ui">
+            <div class="demo-header">
+              <span class="demo-logo">YiM's Blog</span>
+              <button class="demo-button">🌙</button>
+            </div>
+
+            <div class="demo-card">
+              <span class="demo-badge">AI探索</span>
+              <div class="demo-title">使用 Cursor 构建个人博客</div>
+              <p class="demo-text">探索 AI 辅助编程的新范式，提升开发效率...</p>
+              <div class="demo-tags">
+                <span class="demo-tag">AI</span>
+                <span class="demo-tag">工具</span>
+              </div>
+            </div>
+
+            <div class="demo-card">
+              <span class="demo-badge">工作思考</span>
+              <div class="demo-title">产品设计思维模型</div>
+              <p class="demo-text">从用户需求出发，构建产品设计的思维框架...</p>
+              <div class="demo-tags">
+                <span class="demo-tag">产品</span>
+                <span class="demo-tag">思考</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nature Explorer Theme -->
+      <div class="theme-card nature-explorer-theme">
+        <div class="theme-header">
+          <div class="theme-title">方案 3: Nature Explorer</div>
+          <div class="theme-description">绿色+蓝色 · 自然平衡</div>
+        </div>
+        <div class="theme-preview">
+          <div class="color-palette">
+            <div class="color-swatch" style="background: #059669;">主色</div>
+            <div class="color-swatch" style="background: #0891b2;">辅色</div>
+            <div class="color-swatch" style="background: #047857;">悬停</div>
+            <div class="color-swatch" style="background: #d1fae5; color: #065f46;">浅色</div>
+          </div>
+
+          <div class="demo-ui">
+            <div class="demo-header">
+              <span class="demo-logo">YiM's Blog</span>
+              <button class="demo-button">🌙</button>
+            </div>
+
+            <div class="demo-card">
+              <span class="demo-badge">AI探索</span>
+              <div class="demo-title">使用 Cursor 构建个人博客</div>
+              <p class="demo-text">探索 AI 辅助编程的新范式，提升开发效率...</p>
+              <div class="demo-tags">
+                <span class="demo-tag">AI</span>
+                <span class="demo-tag">工具</span>
+              </div>
+            </div>
+
+            <div class="demo-card">
+              <span class="demo-badge">工作思考</span>
+              <div class="demo-title">产品设计思维模型</div>
+              <p class="demo-text">从用户需求出发，构建产品设计的思维框架...</p>
+              <div class="demo-tags">
+                <span class="demo-tag">产品</span>
+                <span class="demo-tag">思考</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="theme-recommendation">
+      <div class="recommendation-title">💡 推荐：方案 2 - Warm Professional（温暖专业）</div>
+      <div class="recommendation-content">
+        <p>这个色系最适合你的博客定位，原因如下：</p>
+        <ul>
+          <li><strong>保留紫色元素</strong> - 与当前色系保持连贯性，不产生割裂感</li>
+          <li><strong>增加粉色温暖</strong> - 让网站更具人文关怀和亲和力</li>
+          <li><strong>视觉记忆点强</strong> - 紫-粉渐变比单纯的紫蓝更独特、更难忘</li>
+          <li><strong>符合多元定位</strong> - 既专业（产品思考），又温暖（生活记录），还时尚（AI探索）</li>
+          <li><strong>情感连接</strong> - 粉紫色系更容易与读者建立情感连接</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
