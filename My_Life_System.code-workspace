@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../Knowledge_Base"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true,
+		"pasteImage.path": "${projectRoot}/assets",
+		"pasteImage.basePath": "${currentFileDir}"
+	}
+}
